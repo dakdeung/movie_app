@@ -1,6 +1,5 @@
 import os
 from config import db
-from models import Person
 
 # Delete database file if it exists currently
 if os.path.exists('final_proj.db'):
