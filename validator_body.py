@@ -43,7 +43,7 @@ class validator_body():
     
     def director_required(director):
         data = [False, ""]
-        
+
         if director.get("name") is None:
             data = [True,"Name cannot be null"]
             return data
@@ -57,3 +57,32 @@ class validator_body():
             data = [True,"Department cannot be null"]
             return data
         return data
+
+    def genre_required(genre):
+        data = [False, ""]
+
+        if genre.get("name") is None:
+            data = [True,"Name cannot be null"]
+            return data
+        return data
+
+    def check_date(start,end):
+        if len(start) < 9 and len(end) <9:
+            return True
+        else:
+            if start[4] != "-" and start[7] != "-": 
+                check_start = True
+            else:
+                check_start = False
+
+            if end is not None:
+                if end[4] != "-" and end[7] != "-": 
+                    check_end = True
+            else:
+                check_end = False
+        
+        if check_start and check_end:
+            return True
+        else:
+            return False
+        

@@ -1,6 +1,6 @@
 from flask import make_response, abort
 from config import db
-from models import Director, DirectorSchema
+from models import Director, DirectorSchema, Movie
 from mapper import Reponse
 from validator_body import validator_body
 
@@ -31,6 +31,56 @@ def read_one(id):
     # Otherwise, nope, didn't find that person
     else:
         return Reponse(404,"Director not found for Id: {id}".format(id=id),[],{})
+
+def read_top(id,limit,key):
+    
+    if key == 'vote':
+        # Get the person requested
+        director = Director.query.join(Movie, Movie.director_id == Director.id).filter(Director.id == id).filter(Movie.director_id == id).order_by(Movie.vote_average.desc()).limit(limit).all()
+    elif key == 'popularity':
+        director = Director.query.join(Movie, Movie.director_id == Director.id).filter(Director.id == id).filter(Movie.director_id == id).order_by(Movie.popularity.desc()).limit(limit).all()
+    else:
+        return Reponse(200,"Key only can popularity or vote",[],{})
+
+    # Did we find a person?
+    if director is not None:
+
+        print(director)
+        # Serialize the data for the response
+        director_schema = DirectorSchema(many=True)
+        data = director_schema.dump(director)
+        
+        return Reponse(200,"Get Succesfully",data,{})
+
+    # Otherwise, nope, didn't find that person
+    else:
+        return Reponse(404,"Movie not found for Id: {id}".format(id=id),[],{})
+
+def read_release(id,start,end):
+    
+    validate_date = validator_body.check_date(start,end)
+
+    if end is None:
+        director = Director.query.filter(Director.id == id).filter(Movie.director_id == id).join(Movie, Movie.director_id == Director.id).filter(Movie.release_date == start).order_by(Movie.release_date.desc()).all()
+    else:
+        director = Director.query.filter(Director.id == id).filter(Movie.director_id == id).join(Movie, Movie.director_id == Director.id).filter(Movie.release_date.between(start, end)).order_by(Movie.release_date.desc()).all()
+
+    if validate_date:
+        return Reponse(409,"Format date wrong (YYYY/MM/DD)",[],{})
+    # Did we find a person?
+    elif director is not None:
+
+        # Serialize the data for the response
+        director_schema = DirectorSchema(many=True)
+        data = director_schema.dump(director)
+
+        print(data)
+        
+        return Reponse(200,"Get Succesfully",data,{})
+
+    # Otherwise, nope, didn't find that person
+    else:
+        return Reponse(404,"Movie not found for Id: {id}".format(id=id),[],{})
 
 def create(director):
 
@@ -133,4 +183,4 @@ def delete(id):
 
     # Otherwise, nope, didn't find that person
     else:
-        return Reponse(200,"Director not found for Id: {id}".format(id=id).format(id=id),[],data)
+        return Reponse(200,"Director not found for Id: {id}".format(id=id).format(id=id),[],{})

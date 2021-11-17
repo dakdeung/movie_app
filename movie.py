@@ -7,7 +7,7 @@ from validator_body import validator_body
 def read_all():
 
     # Create the list of people from our data
-    movie = Movie.query.order_by(Movie.id).all()
+    movie = Movie.query.order_by(Movie.id).limit(15).all()
 
     # Serialize the data for the response
     movie_schema = MovieSchema(many=True)
@@ -23,10 +23,63 @@ def read_one(id):
     if movie is not None:
 
         # Serialize the data for the response
-        person_schema = MovieSchema()
-        data = person_schema.dump(movie)
+        movie_schema = MovieSchema()
+        data = movie_schema.dump(movie)
         
         return Reponse(200,"Get Succesfully",[],data)
+
+    # Otherwise, nope, didn't find that person
+    else:
+        return Reponse(404,"Movie not found for Id: {id}".format(id=id),[],{})
+
+def read_top(limit,key):
+    
+    if key == 'vote':
+        # Get the person requested
+        movie = Movie.query.order_by(Movie.vote_average.desc()).limit(limit).all()
+    elif key == 'popularity':
+        movie = Movie.query.order_by(Movie.popularity.desc()).limit(limit).all()
+    else:
+        return Reponse(200,"Key only can popularity or vote",[],{})
+
+    # Did we find a person?
+    if movie is not None:
+
+        print(movie)
+        # Serialize the data for the response
+        movie_schema = MovieSchema(many=True)
+        data = movie_schema.dump(movie)
+
+        print(data)
+        
+        return Reponse(200,"Get Succesfully",data,{})
+
+    # Otherwise, nope, didn't find that person
+    else:
+        return Reponse(404,"Movie not found for Id: {id}".format(id=id),[],{})
+
+def read_release(start,end):
+    
+    validate_date = validator_body.check_date(start,end)
+
+    if end is None:
+        movie = Movie.query.filter(Movie.release_date == start).order_by(Movie.release_date.desc()).all()
+    else:
+        movie = Movie.query.filter(Movie.release_date.between(start, end)).order_by(Movie.release_date.desc()).all()
+
+    if validate_date:
+        return Reponse(409,"Format date wrong (YYYY/MM/DD)",[],{})
+    # Did we find a person?
+    elif movie is not None:
+
+        print(movie)
+        # Serialize the data for the response
+        movie_schema = MovieSchema(many=True)
+        data = movie_schema.dump(movie)
+
+        print(data)
+        
+        return Reponse(200,"Get Succesfully",data,{})
 
     # Otherwise, nope, didn't find that person
     else:
@@ -156,5 +209,3 @@ def delete(id):
     # Otherwise, nope, didn't find that person
     else:
         return Reponse(404,"Movie not found for Id: {id}".format(id=id),[],{})
-    
-    
