@@ -1,6 +1,7 @@
+from os import name
 from flask import make_response, abort
 from config import db
-from models import Director, Movie, MovieSchema
+from models import Director, Movie, MovieSchema, Genre, GenreSchema
 from mapper import Reponse
 from validator_body import validator_body
 
@@ -91,6 +92,9 @@ def create(movie):
     title = movie.get("title")
     director_id = movie.get("director_id")
     uid = movie.get("uid")
+    id_genre = movie.get("genre")
+
+    name_genre = Genre.query.filter(Genre.id == id_genre).one_or_none()
 
     existing_movie = (
         Movie.query.filter(Movie.title == title)
@@ -121,14 +125,19 @@ def create(movie):
     else:
         # Create a person instance using the schema and the passed in person
         schema = MovieSchema()
-        new_movie = schema.load(movie, session=db.session)
+        
 
         # Add the person to the database
-        db.session.add(new_movie)
+        # db.session.add(new_movie)
+        
+        movie = schema.load(movie, session=db.session)
+        movie.genres.append(name_genre)
+        db.session.add(movie)
         db.session.commit()
+        
 
         # Serialize and return the newly created person in the response
-        data = schema.dump(new_movie)
+        data = schema.dump(movie)
 
         return Reponse(201,"Created Succesfully",[],data)
 
