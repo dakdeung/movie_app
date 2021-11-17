@@ -54,7 +54,7 @@ class MovieDirectorSchema(ma.SQLAlchemyAutoSchema):
     id = fields.Int()
     gender = fields.Int()
     uid = fields.Int()
-    departmenet = fields.Str()
+    department = fields.Str()
 
 class DirectorSchema(ma.SQLAlchemyAutoSchema):
     def __init__(self, **kwargs):

@@ -1,16 +1,18 @@
 from flask import make_response, abort
 from config import db
-from models import Director, DirectorSchema, Movie, MovieSchema
+from models import Director, DirectorSchema
+from mapper import Reponse
+from validator_body import validator_body
 
 def read_all():
 
     # Create the list of people from our data
-    director = Director.query.order_by(Director.id).all()
+    director = Director.query.order_by(Director.id).limit(15).all()
 
     # Serialize the data for the response
     director_schema = DirectorSchema(many=True)
     data = director_schema.dump(director)
-    return data
+    return Reponse(200,"Get All Succesfully",data,{})
 
 def read_one(id):
 
@@ -24,14 +26,11 @@ def read_one(id):
         # Serialize the data for the response
         director_schema = DirectorSchema()
         data = director_schema.dump(director)
-        return data
+        return Reponse(200,"Get Succesfully",data,{})
 
     # Otherwise, nope, didn't find that person
     else:
-        abort(
-            404,
-            "Director not found for Id: {id}".format(id=id),
-        )
+        return Reponse(404,"Director not found for Id: {id}".format(id=id),[],{})
 
 def create(director):
 
@@ -43,9 +42,17 @@ def create(director):
     )
 
 
-    # Can we insert this person?
-    if existing_director is None:
+    validate_body = validator_body.director_required(director)
 
+    if validate_body[0]:
+        return Reponse(409,validate_body[1],[],{})
+    # Can we insert this person?
+    elif existing_director is not None:
+
+        return Reponse(404,"Director with UID {uid} already exists ".format(uid=uid),[],{})
+
+    # Otherwise, nope, person exists already
+    else:
         # Create a person instance using the schema and the passed in person
         schema = DirectorSchema()
         new_director = schema.load(director, session=db.session)
@@ -57,16 +64,8 @@ def create(director):
         # Serialize and return the newly created person in the response
         data = schema.dump(new_director)
 
-        return data, 201
-
-    # Otherwise, nope, person exists already
-    else:
-        abort(
-            409,
-            "Director {uid} exists already not found".format(
-                uid=uid
-            ),
-        )
+        return Reponse(201,"Created Succesfully",[],data)
+        
 
 def update(id, director):
 
@@ -83,23 +82,19 @@ def update(id, director):
         .one_or_none()
     )
 
+    validate_body = validator_body.director_required(director)    
+
+    if validate_body[0]:
+        return Reponse(409,validate_body[1],[],{})
     # Are we trying to find a person that does not exist?
-    if update_director is None:
-        abort(
-            404,
-            "Director not found for Id: {id}".format(id=id),
-        )
+    elif update_director is None:
+        return Reponse(404,"Director not found for Id: {id}".format(id=id),[],{})
 
     # Would our update create a duplicate of another person already existing?
     elif (
         existing_director is not None and existing_director.id != id
     ):
-        abort(
-            409,
-            "Director {uid} exists already".format(
-                uid=uid
-            ),
-        )
+        return Reponse(409,"Director {uid} exists already".format(uid=uid),[],{})
 
     # Otherwise go ahead and update!
     else:
@@ -118,7 +113,7 @@ def update(id, director):
         # return updated person in the response
         data = schema.dump(update_director)
 
-        return data, 200
+        return Reponse(200,"Update Successfully",[],data)
 
 
 def delete(id):
@@ -134,13 +129,8 @@ def delete(id):
     if director is not None:
         db.session.delete(director)
         db.session.commit()
-        return make_response(
-            "Director {id} deleted".format(id=id), 200
-        )
+        return Reponse(200,"Director {id} deleted".format(id=id),[],{})
 
     # Otherwise, nope, didn't find that person
     else:
-        abort(
-            404,
-            "Director not found for Id: {id}".format(id=id),
-        )
+        return Reponse(200,"Director not found for Id: {id}".format(id=id).format(id=id),[],data)
