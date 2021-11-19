@@ -137,8 +137,6 @@ def update(id, genre):
             schema = GenreSchema()
             update = schema.load(genre, session=db.session)
 
-            # Set the id to the genre we want to update
-            update.id = update_genre.id
             # looping genre
             for i in movie:
                 # find movie by id
