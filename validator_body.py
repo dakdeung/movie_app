@@ -1,8 +1,14 @@
-class validator_body():
-    
-    def movie_required(movie):
-        data = [False,""]
+from models import Movie, Genre
 
+class validator_body():
+    """
+    This class for validator function
+    """
+    def movie_required(movie):
+        """
+        This function for validator from movie
+        """
+        data = [False,""]
         if movie.get("original_title") is None:
             data = [True,"Original Title cannot be null"]
             return data
@@ -39,9 +45,18 @@ class validator_body():
         elif movie.get("director_id") is None:
             data = [True,"Director_id cannot be null"]
             return data
+        elif movie.get("genre") is None:
+            data = [True,"Genre cannot be null"]
+            return data
+        elif type(movie.get("genre")[0]) is dict:
+            data = [True,"Genre cannot be dict"]
+            return data
         return data
     
     def director_required(director):
+        """
+        This function for validator from director
+        """
         data = [False, ""]
 
         if director.get("name") is None:
@@ -59,14 +74,26 @@ class validator_body():
         return data
 
     def genre_required(genre):
+        """
+        This function for validator from genre
+        """
         data = [False, ""]
 
         if genre.get("name") is None:
             data = [True,"Name cannot be null"]
             return data
+        elif genre.get("movie") is None or genre.get("movie") == False:
+            data = [True,"Movie cannot be null"]
+            return data
+        elif type(genre.get("movie")[0]) is dict:
+            data = [True,"Movie cannot be dict"]
+            return data
         return data
 
     def check_date(start,end):
+        """
+        This function for validator date format
+        """
         if len(start) < 9 and len(end) <9:
             return True
         else:
@@ -85,4 +112,48 @@ class validator_body():
             return True
         else:
             return False
+    
+    def check_genre_value(movie):
+        """
+        This function for validator value from array genre
+        """
+        data = [True,""]
+        genre = movie.get("genre")
+        # check genre value
+
+        if genre is not None:   
+            count = 0
+            for x in genre:
+                name_genre = Genre.query.filter(Genre.id == x).one_or_none()
+                if name_genre is None:
+                    data = [True, x]
+                else:
+                    count += 1
+            if count == len(genre):
+                data = [False, ""]
+        return data
+
+
+    def check_movie_value(genre):
+        """
+        This function for validator value from array movie
+        """
+        data = [True,""]
+        movie = genre.get("movie")
+        # check genre value
+
+        if movie is not None:   
+            count = 0
+            for x in movie:
+                name_movie = Movie.query.filter(Movie.id == x).one_or_none()
+                if name_movie is None:
+                    data = [True, x]
+                else:
+                    print(count)
+                    count += 1
+            if count == len(movie):
+                data = [False, ""]
+        return data
+      
+                
         

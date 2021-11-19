@@ -13,7 +13,11 @@ app = connex_app.app
 
 # Configure the SQLAlchemy part of the app instance
 app.config['SQLALCHEMY_ECHO'] = True
+
+# URL to use database local
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'final_proj.db')
+
+# URL to use database heroku
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://dqtzkvfapudtav:57708101fad9624d3f791065db5122d2fc2e336bbe5b9a8c3bec7ce3bcf8db3a@ec2-107-22-83-3.compute-1.amazonaws.com:5432/de5ndunumctma9'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

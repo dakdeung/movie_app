@@ -1,5 +1,6 @@
 import os
 from config import db
+from models import Movie, Director, Genre
 
 # Delete database file if it exists currently
 if os.path.exists('final_proj.db'):

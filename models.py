@@ -3,12 +3,18 @@ from marshmallow import fields
 from sqlalchemy.orm import backref
 from marshmallow import EXCLUDE
 
+"""
+This variable to connect from movie and genre with many to many relationship schema
+"""
 movie_genre = db.Table('movie_genre',
     db.Column('movie_id', db.Integer, db.ForeignKey('movies.id')),
     db.Column('genre_id', db.Integer, db.ForeignKey('genres.id'))
 )
 
 class Movie(db.Model):
+    """
+    This class exists to handle movie model
+    """
     __tablename__ = 'movies'
     title = db.Column(db.String(1000))
     budget = db.Column(db.Integer)
@@ -28,6 +34,9 @@ class Movie(db.Model):
                                secondary=movie_genre, back_populates="movies")
 
 class Director(db.Model):
+    """
+    This class exists to handle director model
+    """
     __tablename__ = 'directors'
     name = db.Column(db.String(50))
     id = db.Column(db.Integer, primary_key=True)
@@ -36,6 +45,9 @@ class Director(db.Model):
     department = db.Column(db.String(50))
 
 class Genre(db.Model):
+    """
+    This class exists to handle genre model
+    """
     __tablename__ = 'genres'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
@@ -44,6 +56,9 @@ class Genre(db.Model):
         back_populates="genres")
 
 class MovieSchema(ma.SQLAlchemyAutoSchema):
+    """
+    This class exists to handle movie schema
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -71,6 +86,9 @@ class MovieDirectorSchema(ma.SQLAlchemyAutoSchema):
     department = fields.Str()
 
 class MovieGenreSchema(ma.SQLAlchemyAutoSchema):
+    """
+    This class exists to get around a recursion issue
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs) 
 
@@ -78,6 +96,9 @@ class MovieGenreSchema(ma.SQLAlchemyAutoSchema):
     name = fields.Str()
 
 class DirectorSchema(ma.SQLAlchemyAutoSchema):
+    """
+    This class exists to handle director schema
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -112,6 +133,9 @@ class DirectorMovieSchema(ma.SQLAlchemyAutoSchema):
     director_id = fields.Int()
 
 class GenreSchema(ma.SQLAlchemyAutoSchema):
+    """
+    This class exists to handle genre schema
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
